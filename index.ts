@@ -1,5 +1,5 @@
 interface DirectiveBinding {
-  value: { min: number; max: number };
+  value: { min: number; max: number; allowStartZero: boolean };
   modifiers: { minus: boolean; point: boolean; money: boolean };
 }
 
@@ -65,6 +65,9 @@ const validBinding = (binding: DirectiveBinding) => {
   if (binding.value?.max && isNaN(Number(binding.value.max))) {
     throw "v-number max value must be number";
   }
+  if (binding.value?.allowStartZero && typeof binding.value.allowStartZero !== "boolean") {
+    throw "v-number allow start zero must be boolean";
+  }
 };
 
 const notNumber = /(?!^-)[^0-9]/g;
@@ -98,6 +101,7 @@ const DEFAULT_MIN_NUMBER = -10000000000000000000;
 const DEFAULT_MAX_NUMBER = 10000000000000000000;
 const DECIMAL_SEPARATOR = ".";
 const THOUSAND_SEPARATOR = ",";
+const DEFAULT_ALLOW_START_ZERO = false;
 
 const keyEvent = (e: Event, binding: DirectiveBinding) => {
   const { key, ctrlKey, metaKey } = e as KeyboardEvent;
@@ -216,9 +220,16 @@ const processMoney = (el: HTMLInputElement, money: boolean) => {
   }
 };
 
+const adjustZeroPrefix = (el: HTMLInputElement, binding: DirectiveBinding) => {
+  const allowStartZero: boolean = binding.value?.allowStartZero ?? DEFAULT_ALLOW_START_ZERO;
+  if (!allowStartZero) {
+    deleteFirstZero(el);
+  }
+};
+
 const blurEvent = (e: Event, binding: DirectiveBinding) => {
   const el = e.target as HTMLInputElement;
-  deleteFirstZero(el);
+  adjustZeroPrefix(el, binding);
   deleteFirstSeparator(el);
   deleteLastZeroForDecimal(el);
   deleteLastDecimalPoint(el);
