@@ -66,7 +66,7 @@ const validBinding = (binding: DirectiveBinding) => {
     throw "v-number max value must be number";
   }
   if (binding.value?.allowStartZero && typeof binding.value.allowStartZero !== "boolean") {
-    throw "v-number allow start zero must be boolean";
+    throw "v-number allowStartZero must be boolean";
   }
 };
 
